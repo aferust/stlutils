@@ -47,7 +47,6 @@ final class STL {
 }
 
 STL readSTL(string filePath){
-    import std.typecons: tuple;
     import std.path: baseName;
     
     auto stl = new STL();
