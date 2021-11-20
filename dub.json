@@ -1,0 +1,18 @@
+{
+    "authors": [
+        "Ferhat Kurtulmuş"
+    ],
+    "copyright": "Copyright © 2021, Ferhat Kurtulmuş",
+    "description": "Some utility for reading and writing both ASCII and binary STL files",
+    "license": "boost",
+    "name": "stlutils",
+    "version": "0.0.1",
+    "importPaths": ["source"],
+    "sourcePaths": ["source"],
+    "configurations": [
+        {
+            "name": "default",
+            "targetType": "library"
+        }
+    ]
+}
