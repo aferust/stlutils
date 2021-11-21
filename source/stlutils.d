@@ -154,8 +154,6 @@ void toBinarySTLFile(STL stl, string filePath){
 
     int numOfTri = stl.numOfTriangles;
 
-    ubyte[] sysBuf = new ubyte[80+4+(12+12+12+12+2) * numOfTri];
-
     fwriter.rawWrite(stl.header[]);
     
     fwriter.rawWrite((cast(ubyte*)&numOfTri)[0..int.sizeof]);
