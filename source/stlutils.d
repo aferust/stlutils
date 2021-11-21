@@ -23,7 +23,7 @@ final class STL {
     public float[] vertices;
 
     // this makes only sense  for binary stl format
-    public ubyte[] header = cast(ubyte[])"##Binary STL####################################################################";
+    public ubyte[80] header = cast(ubyte[80])"##Binary STL####################################################################";
     
     // in the standard format, attributes should be zero because most software does not understand anything else
     // public ushort[] attributes; // maybe implement this.
@@ -121,7 +121,7 @@ void toBinarySTLFile(STL stl, string filePath){
 
     ubyte[] sysBuf = new ubyte[80+4+(12+12+12+12+2) * numOfTri];
 
-    sysBuf[0..80] = stl.header;
+    sysBuf[0..80] = stl.header[];
     
     sysBuf[80..84] = (cast(ubyte*)&numOfTri)[0..int.sizeof];
     
@@ -151,7 +151,7 @@ void readBinaryFile(S)(STL stl, auto ref S filePath){
 
     ubyte[80] _header;
     file.rawRead(_header[]);
-    stl.header = _header[];
+    stl.header[] = _header[];
 
     ubyte[4] _numOfTriangles;
     file.rawRead(_numOfTriangles[]);
@@ -179,5 +179,22 @@ void readBinaryFile(S)(STL stl, auto ref S filePath){
 }
 
 void toAsciiSTLFile(STL stl, string filePath){
-    assert(0, "toAsciiSTLFile is not implemented yet!");
+    File file;
+    file.open(filePath, "w");
+    scope(exit) file.close();
+
+    file.writeln("solid STLExport");
+
+    foreach (vchunk, nchunk; zip(chunks(stl.vertices, 9), chunks(stl.normals, 3))){
+        file.writefln("facet normal %f %f %f", nchunk[0], nchunk[1], nchunk[2]);
+        file.writeln("   outer loop");
+        file.writefln("      vertex %f %f %f", vchunk[0], vchunk[1], vchunk[2]);
+        file.writefln("      vertex %f %f %f", vchunk[3], vchunk[4], vchunk[5]);
+        file.writefln("      vertex %f %f %f", vchunk[6], vchunk[7], vchunk[8]);
+        file.writeln("   endloop");
+        file.writeln("endfacet");
+    }
+
+    file.writeln("endsolid STLExport");
+
 }

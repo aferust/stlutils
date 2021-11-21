@@ -23,6 +23,8 @@ void main() {
 
     writeln(stl2.vertices);
     writeln(stl2.normals);
+
+    stl2.toAsciiSTLFile("femur_ascii.stl");
 }
 
 ```
