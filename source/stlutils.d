@@ -111,6 +111,7 @@ void readAsciiFile(S)(STL stl, auto ref S filePath){
     }
 }
 
+/* // write-at-once
 void toBinarySTLFile(STL stl, string filePath){
     File fwriter;
 
@@ -142,6 +143,36 @@ void toBinarySTLFile(STL stl, string filePath){
     }
     
     fwriter.rawWrite(sysBuf[]);
+}
+*/
+
+void toBinarySTLFile(STL stl, string filePath){
+    File fwriter;
+
+    fwriter.open(filePath, "wb");
+    scope(exit) fwriter.close();
+
+    int numOfTri = stl.numOfTriangles;
+
+    ubyte[] sysBuf = new ubyte[80+4+(12+12+12+12+2) * numOfTri];
+
+    fwriter.rawWrite(stl.header[]);
+    
+    fwriter.rawWrite((cast(ubyte*)&numOfTri)[0..int.sizeof]);
+    
+    short _attr = 0;
+    
+    foreach (vchunk, nchunk; zip(chunks(stl.vertices, 9), chunks(stl.normals, 3))){
+
+        ubyte[50] tbuff;
+
+        tbuff[0..12] = cast(ubyte[])(nchunk[]);
+        tbuff[12..48] = cast(ubyte[])(vchunk[]);
+        
+        tbuff[48..50] = (cast(ubyte*)&_attr)[0..short.sizeof];
+
+        fwriter.rawWrite(tbuff[]);
+    }
 }
 
 void readBinaryFile(S)(STL stl, auto ref S filePath){
