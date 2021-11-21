@@ -18,6 +18,8 @@ import std.array : split;
 import std.range;
 import std.conv;
 
+// TODO: use exceptions more for error handling
+
 final class STL {
     public float[] normals;
     public float[] vertices;
@@ -85,8 +87,9 @@ void readAsciiFile(S)(STL stl, auto ref S filePath){
         return str.to!float;
     }
 
+    // maybe preallocate vertices and normals based on the number of the lines
     stl.normals.reserve(20);
-    stl.vertices.reserve(20*3);
+    stl.vertices.reserve(20*9);
 
     while (!file.eof){
         char[] _line;
