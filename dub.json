@@ -6,7 +6,7 @@
     "description": "Some utility for reading and writing both ASCII and binary STL files",
     "license": "boost",
     "name": "stlutils",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "importPaths": ["source"],
     "sourcePaths": ["source"],
     "configurations": [
