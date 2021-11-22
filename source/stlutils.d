@@ -230,3 +230,49 @@ void toAsciiSTLFile(STL stl, string filePath){
     file.writeln("endsolid STLExport");
 
 }
+
+void toOBJFile(STL stl, string filePath){
+    File file;
+    file.open(filePath, "w");
+    scope(exit) file.close();
+
+    file.writeln("#");
+    file.writeln("# object STLExport");
+    file.writeln("#");
+    file.write("\n");
+
+    foreach (v; chunks(stl.vertices, 9)){
+        file.writefln("v %f %f %f", v[0], v[1], v[2]);
+        file.writefln("v %f %f %f", v[3], v[4], v[5]);
+        file.writefln("v %f %f %f", v[6], v[7], v[8]);
+    }
+
+    file.writefln("# %u vertices", stl.vertices.length/9);
+
+    file.write("\n");
+
+    foreach (n; chunks(stl.normals, 3)){
+        file.writefln("vn %f %f %f", n[0], n[1], n[2]);
+    }
+
+    file.writefln("# %u vertex normals", stl.normals.length/3);
+
+    file.write("\n");
+    
+    file.writeln("g STLExport");
+    file.writeln("s 1");
+
+    ulong a1 = 1, a2 = 1, b1 = 2, b2 = 1, c1 = 3, c2 = 1;
+
+    foreach ( _ ; 0..stl.vertices.length/9){
+        file.writefln("f %u//%u %u//%u %u//%u", a1, a2, b1, b2, c1, c2);
+        a1 += 3;
+        a2 += 1;
+        b1 += 3;
+        b2 += 1;
+        c1 += 3;
+        c2 += 1;
+    }
+
+    file.writefln("# %u polygons", stl.vertices.length/9);
+}

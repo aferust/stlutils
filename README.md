@@ -25,6 +25,9 @@ void main() {
     writeln(stl2.normals);
 
     stl2.toAsciiSTLFile("femur_ascii.stl");
+
+    // write to Wavefront .obj file
+    stl2.toOBJFile("femur.obj");
 }
 
 ```
