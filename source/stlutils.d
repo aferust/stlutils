@@ -87,30 +87,39 @@ void readAsciiFile(S)(STL stl, auto ref S filePath){
         return str.to!float;
     }
 
-    // maybe preallocate vertices and normals based on the number of the lines
-    stl.normals.reserve(20);
-    stl.vertices.reserve(20*9);
+    import std.algorithm.searching : startsWith;
+    ulong nVertexLine;
+    while (!file.eof){
+        char[] _line;
+        file.readln(_line);
+        if(_line.chomp.strip.startsWith("vertex"))
+            ++nVertexLine;
+    }
+    
+    file.seek(0);
+
+    stl.vertices = new float[nVertexLine*3];
+    stl.normals = new float[nVertexLine];
+    
+    ulong vcur, ncur;
 
     while (!file.eof){
         char[] _line;
         file.readln(_line);
-        _line = chomp(_line);
-        if(!_line.length) continue;
+        auto line = chomp(_line);
+        if(!line.length) continue;
 
-        string line = assumeUnique(_line);
-
-        string[] tokens = line.strip.split!isWhite;
-
+        auto tokens = line.strip.split!isWhite;
+        
         if(tokens[0] == "vertex"){
-            stl.vertices ~= parseFloat(tokens[1]);
-            stl.vertices ~= parseFloat(tokens[2]);
-            stl.vertices ~= parseFloat(tokens[3]);
+            stl.vertices[vcur++] = parseFloat(tokens[1]);
+            stl.vertices[vcur++] = parseFloat(tokens[2]);
+            stl.vertices[vcur++] = parseFloat(tokens[3]);
         } else if(tokens[0] == "facet"){
-            stl.normals ~= parseFloat(tokens[2]);
-            stl.normals ~= parseFloat(tokens[3]);
-            stl.normals ~= parseFloat(tokens[4]);
-        }
-            
+            stl.normals[ncur++] = parseFloat(tokens[2]);
+            stl.normals[ncur++] = parseFloat(tokens[3]);
+            stl.normals[ncur++] = parseFloat(tokens[4]);
+        } 
     }
 }
 
@@ -218,11 +227,11 @@ void toAsciiSTLFile(STL stl, string filePath){
     file.writeln("solid STLExport");
 
     foreach (vchunk, nchunk; zip(chunks(stl.vertices, 9), chunks(stl.normals, 3))){
-        file.writefln("facet normal %f %f %f", nchunk[0], nchunk[1], nchunk[2]);
+        file.writefln("facet normal %.6g %.6g %.6g", nchunk[0], nchunk[1], nchunk[2]);
         file.writeln("   outer loop");
-        file.writefln("      vertex %f %f %f", vchunk[0], vchunk[1], vchunk[2]);
-        file.writefln("      vertex %f %f %f", vchunk[3], vchunk[4], vchunk[5]);
-        file.writefln("      vertex %f %f %f", vchunk[6], vchunk[7], vchunk[8]);
+        file.writefln("      vertex %.6g %.6g %.6g", vchunk[0], vchunk[1], vchunk[2]);
+        file.writefln("      vertex %.6g %.6g %.6g", vchunk[3], vchunk[4], vchunk[5]);
+        file.writefln("      vertex %.6g %.6g %.6g", vchunk[6], vchunk[7], vchunk[8]);
         file.writeln("   endloop");
         file.writeln("endfacet");
     }
@@ -242,9 +251,9 @@ void toOBJFile(STL stl, string filePath){
     file.write("\n");
 
     foreach (v; chunks(stl.vertices, 9)){
-        file.writefln("v %f %f %f", v[0], v[1], v[2]);
-        file.writefln("v %f %f %f", v[3], v[4], v[5]);
-        file.writefln("v %f %f %f", v[6], v[7], v[8]);
+        file.writefln("v %.6g %.6g %.6g", v[0], v[1], v[2]);
+        file.writefln("v %.6g %.6g %.6g", v[3], v[4], v[5]);
+        file.writefln("v %.6g %.6g %.6g", v[6], v[7], v[8]);
     }
 
     file.writefln("# %u vertices", stl.vertices.length/9);
@@ -252,7 +261,7 @@ void toOBJFile(STL stl, string filePath){
     file.write("\n");
 
     foreach (n; chunks(stl.normals, 3)){
-        file.writefln("vn %f %f %f", n[0], n[1], n[2]);
+        file.writefln("vn %.6g %.6g %.6g", n[0], n[1], n[2]);
     }
 
     file.writefln("# %u vertex normals", stl.normals.length/3);
